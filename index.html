@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR/URL Sentinel - Prototype Deteksi Phishing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QR/URL Sentinel</h1>
+            <p class="subtitle">Amankan Pemindaian Anda, Verifikasi Tautan Anda</p>
+    
+
+        <section class="input-section">
+            <h2>Simulasi Pemindaian QR/URL</h2>
+            <div class="info-box">
+                <p><strong>Cara Penggunaan:</strong> Tempelkan string QRIS atau URL ke dalam kotak di bawah. Kami akan mensimulasikan proses deteksi berdasarkan database dummy kami.</p>
+                <p><strong>Coba contoh-contoh ini:</strong></p>
+                <ul>
+                    <li><strong>QRIS Valid:</strong> `00020101021126750023COM.BANKSUMSELBABEL.WWW01189360012001201481730215BSB0100000481730303UMI51440014ID.CO.QRIS.WWW0215ID10221613974200303UMI5204931153033605802ID5915DINAS PERIKANAN6014BELITUNG TIMUR61053351262070703A01630484BA` (Dinas Perikanan)</li>
+                    <li><strong>QRIS Berbahaya:</strong> `00020101021226580013ID.CO.BRI.WWW01189360000200700826970208700826970303UMI51440014ID.CO.QRIS.WWW0215ID10253854300340303UMI520452115303360540732018185502025605799125802ID5924PENGEMBALIAN-DANA-TIKTOK6013JAKARTA PUSAT61051012062070703A0163040E1F` (Pengembalian Dana TikTok)</li>
+                    <li><strong>URL Aman:</strong> `https://shopee.co.id`</li>
+                    <li><strong>URL Berbahaya:</strong> `http://bit.ly/shopeebigsale662`</li>
+                </ul>
+            </div>
+            <textarea id="dataInput" placeholder="Tempelkan data QRIS atau URL di sini..."></textarea>
+            <button onclick="performScan()">Analisis Data</button>
+        </section>
+
+        <section class="result-section">
+            <h2>Hasil Deteksi</h2>
+            <div id="resultOutput" class="result-card">
+                <p class="placeholder">Masukkan data di atas untuk melihat hasil analisis.</p>
+            </div>
+        </section>
+
+        <section class="framework-explanation">
+            <h2>Kerangka Deteksi </h2>
+            <div class="flow-chart-container">
+                <div class="flow-step">Pemindaian QR</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">Ekstraksi Data</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step decision">Transformasi</div>
+                <div class="flow-path">
+                    <div class="path-option">
+                        <div class="path-label">QRIS</div>
+                        <div class="flow-arrow horizontal">→</div>
+                        <div class="flow-step">Simpan & Muat (DB)</div>
+                        <div class="flow-arrow horizontal">→</div>
+                        <div class="flow-step decision">Deteksi</div>
+                        <div class="path-result">
+                            <div class="result-label malicious">BERBAHAYA</div>
+                            <div class="result-label valid">VALID</div>
+                        </div>
+                    </div>
+                    <div class="path-option">
+                        <div class="path-label">URL</div>
+                        <div class="flow-arrow horizontal">→</div>
+                        <div class="flow-step">Analisis</div>
+                        <div class="flow-arrow horizontal">→</div>
+                        <div class="flow-step decision">Deteksi</div>
+                        <div class="path-result">
+                            <div class="result-label malicious">BERBAHAYA</div>
+                            <div class="result-label secure">AMAN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="framework-description">
+                Sistem pertama akan *Mengekstrak* data dari input (simulasi pemindaian QR). Kemudian, sistem *Mentransformasi* data untuk mengidentifikasi apakah itu kode QRIS atau URL. Data QRIS di *Simpan & Dimuat* sebagai referensi sebelum *Deteksi*. URL langsung menjalani *Analisis* untuk reputasi. Kedua jalur ini mengarah pada hasil *Deteksi* akhir: BERBAHAYA/VALID untuk QRIS, dan BERBAHAYA/AMAN untuk URL.
+            </p>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
