@@ -130,16 +130,16 @@ function displayResult(result, outputDiv) {
 
     if (result.status === "MALICIOUS") {
         statusClass = "malicious";
-        statusDisplay = "⚠️ BERBAHAYA ⚠️";
+        statusDisplay = " BERBAHAYA ";
     } else if (result.status === "VALID") {
         statusClass = "valid";
-        statusDisplay = "✅ VALID ✅";
+        statusDisplay = " VALID ";
     } else if (result.status === "SECURE") {
         statusClass = "secure";
-        statusDisplay = "🔒 AMAN 🔒";
+        statusDisplay = " AMAN ";
     } else {
         statusClass = "unknown";
-        statusDisplay = "❓ TIDAK DIKETAHUI ❓";
+        statusDisplay = " TIDAK DIKETAHUI ";
     }
 
     outputDiv.className = `result-card ${statusClass}`;
