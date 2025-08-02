@@ -17,7 +17,7 @@
         <section class="input-section">
             <h2>Simulasi Pemindaian QR/URL</h2>
             <div class="info-box">
-                <p><strong>Cara Penggunaan:</strong> Arahkan kamera Anda ke QR code. Sistem akan mensimulasikan proses deteksi berdasarkan database dummy kami.</p>
+                <p><strong>Cara Penggunaan:</strong> Arahkan kamera Anda ke QR code. Tekan tombol "Pindai" untuk mengambil gambar dan menganalisisnya.</p>
                 <p><strong>Coba contoh-contoh ini:</strong></p>
                 <ul>
                     <li><strong>QRIS Valid:</strong> `00020101021126750023COM.BANKSUMSELBABEL.WWW01189360012001201481730215BSB0100000481730303UMI51440014ID.CO.QRIS.WWW0215ID10221613974200303UMI5204931153033605802ID5915DINAS PERIKANAN6014BELITUNG TIMUR61053351262070703A01630484BA` (Dinas Perikanan)</li>
@@ -27,17 +27,19 @@
                 </ul>
             </div>
             <div class="scanner-container">
-                <video id="camera-feed"></video>
+                <video id="camera-feed" style="display: none;"></video>
                 <div class="result-display">
-                    <p>Arahkan kamera ke QR code...</p>
+                    <p>Tekan "Mulai Pindai" untuk mengaktifkan kamera.</p>
                 </div>
             </div>
+            <button id="startScanBtn" onclick="startScanner()">Mulai Pindai</button>
+            <button id="captureBtn" onclick="captureAndAnalyze()" style="display: none;">Pindai</button>
         </section>
 
         <section class="result-section">
             <h2>Hasil Deteksi</h2>
             <div id="resultOutput" class="result-card">
-                <p class="placeholder">Arahkan kamera ke QR code untuk melihat hasil analisis.</p>
+                <p class="placeholder">Hasil analisis akan muncul di sini.</p>
             </div>
             <button id="scanAgainBtn" onclick="startScanner()" style="display: none;">Pindai Lagi</button>
         </section>

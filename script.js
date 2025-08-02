@@ -135,35 +135,41 @@ function displayResult(result, outputDiv) {
         <p><strong>Status:</strong> <span style="font-size: 1.2em;">${statusDisplay}</span></p>
         <p><strong>Catatan:</strong> ${result.notes}</p>
     `;
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('startScanBtn').style.display = 'none';
     document.getElementById('scanAgainBtn').style.display = 'block';
 }
 
 const video = document.getElementById('camera-feed');
 const resultOutputDiv = document.getElementById('resultOutput');
+const startScanBtn = document.getElementById('startScanBtn');
+const captureBtn = document.getElementById('captureBtn');
 const scanAgainBtn = document.getElementById('scanAgainBtn');
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
-let scanning = false;
 
 async function startScanner() {
-    if (scanning) return;
     try {
+        startScanBtn.style.display = 'none';
+        captureBtn.style.display = 'none';
         scanAgainBtn.style.display = 'none';
-        resultOutputDiv.innerHTML = '<p class="placeholder">Memuat kamera...</p>';
+        resultOutputDiv.innerHTML = '<p>Memuat kamera...</p>';
         resultOutputDiv.className = 'result-card unknown';
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = stream;
         video.setAttribute('playsinline', true);
+        video.style.display = 'block';
         video.play();
-        scanning = true;
         
-        setTimeout(() => tick(), 200);
+        resultOutputDiv.innerHTML = '<p>Arahkan kamera ke QR code, lalu tekan "Pindai".</p>';
+        captureBtn.style.display = 'block';
+
     } catch (err) {
         console.error("Error accessing camera: ", err);
-        resultOutputDiv.innerHTML = '<p class="placeholder">Gagal mengakses kamera. Mohon berikan izin.</p>';
+        resultOutputDiv.innerHTML = '<p>Gagal mengakses kamera. Mohon berikan izin.</p>';
         resultOutputDiv.className = 'result-card malicious';
-        scanAgainBtn.style.display = 'block';
+        startScanBtn.style.display = 'block';
     }
 }
 
@@ -171,13 +177,13 @@ function stopScanner() {
     if (video.srcObject) {
         video.srcObject.getTracks().forEach(track => track.stop());
     }
-    scanning = false;
+    video.style.display = 'none';
 }
 
-function tick() {
-    if (!scanning || !video.srcObject) {
-        return;
-    }
+function captureAndAnalyze() {
+    stopScanner();
+    resultOutputDiv.innerHTML = '<p>Menganalisis...</p>';
+    resultOutputDiv.className = 'result-card unknown';
 
     canvas.height = video.videoHeight;
     canvas.width = video.videoWidth;
@@ -188,20 +194,20 @@ function tick() {
         inversionAttempts: "dontInvert",
     });
 
-    if (code) {
-        stopScanner();
-        resultOutputDiv.innerHTML = '<p class="placeholder">Menganalisis...</p>';
-        resultOutputDiv.className = 'result-card unknown';
-        
-        setTimeout(() => {
+    setTimeout(() => {
+        if (code) {
             const result = analyzeAndDetect(code.data);
             displayResult(result, resultOutputDiv);
-        }, 500); 
-    } else {
-        requestAnimationFrame(tick);
-    }
+        } else {
+            resultOutputDiv.innerHTML = '<p>Tidak ada QR code yang terdeteksi. Silakan coba lagi.</p>';
+            resultOutputDiv.className = 'result-card unknown';
+            captureBtn.style.display = 'none';
+            startScanBtn.style.display = 'none';
+            scanAgainBtn.style.display = 'block';
+        }
+    }, 500); 
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    startScanner();
+    startScanBtn.style.display = 'block';
 });
