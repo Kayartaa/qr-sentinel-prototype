@@ -135,10 +135,12 @@ function displayResult(result, outputDiv) {
         <p><strong>Status:</strong> <span style="font-size: 1.2em;">${statusDisplay}</span></p>
         <p><strong>Catatan:</strong> ${result.notes}</p>
     `;
+    document.getElementById('scanAgainBtn').style.display = 'block';
 }
 
 const video = document.getElementById('camera-feed');
 const resultOutputDiv = document.getElementById('resultOutput');
+const scanAgainBtn = document.getElementById('scanAgainBtn');
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
 let scanning = false;
@@ -146,6 +148,7 @@ let scanning = false;
 async function startScanner() {
     if (scanning) return;
     try {
+        scanAgainBtn.style.display = 'none';
         resultOutputDiv.innerHTML = '<p class="placeholder">Memuat kamera...</p>';
         resultOutputDiv.className = 'result-card unknown';
 
@@ -160,6 +163,7 @@ async function startScanner() {
         console.error("Error accessing camera: ", err);
         resultOutputDiv.innerHTML = '<p class="placeholder">Gagal mengakses kamera. Mohon berikan izin.</p>';
         resultOutputDiv.className = 'result-card malicious';
+        scanAgainBtn.style.display = 'block';
     }
 }
 
