@@ -26,17 +26,17 @@ const qrisDataMapping = {
 };
 
 const urlDataMapping = {
+    "shopee.co.id": {
+        entity: "shopee.co.id",
+        type: "URL",
+        status: "SECURE",
+        notes: "Domain resmi dan aman untuk Shopee Indonesia."
+    },
     "http://bit.ly/shopeebigsale662": {
         entity: "bit.ly/shopeebigsale662",
         type: "URL",
         status: "MALICIOUS",
         notes: "URL singkat yang sering digunakan untuk phishing atau pengalihan berbahaya. Tampaknya promosi Shopee palsu."
-    },
-    "https://shopee.co.id": {
-        entity: "shopee.co.id",
-        type: "URL",
-        status: "SECURE",
-        notes: "Domain resmi dan aman untuk Shopee Indonesia."
     }
 };
 
@@ -66,9 +66,15 @@ function extractQrisMerchantName(qrisString) {
 
 function analyzeAndDetect(inputData) {
     const processedInput = inputData.trim();
-
-    if (isValidUrl(processedInput) || processedInput.includes("bit.ly") || processedInput.includes("shopee.co.id")) {
-        const foundUrl = urlDataMapping[processedInput];
+    
+    if (isValidUrl(processedInput) || processedInput.includes("bit.ly")) {
+        let foundUrl = null;
+        for (const key in urlDataMapping) {
+            if (processedInput.includes(key)) {
+                foundUrl = urlDataMapping[key];
+                break;
+            }
+        }
         if (foundUrl) {
             return foundUrl;
         } else {
@@ -136,25 +142,20 @@ const resultOutputDiv = document.getElementById('resultOutput');
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
 let scanning = false;
-let lastScanResult = null;
 
 async function startScanner() {
     if (scanning) return;
-
     try {
         resultOutputDiv.innerHTML = '<p class="placeholder">Memuat kamera...</p>';
         resultOutputDiv.className = 'result-card unknown';
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = stream;
-        video.setAttribute('playsinline', true); 
+        video.setAttribute('playsinline', true);
         video.play();
         scanning = true;
-
-        video.addEventListener('loadedmetadata', () => {
-            tick();
-        });
-
+        
+        setTimeout(() => tick(), 200);
     } catch (err) {
         console.error("Error accessing camera: ", err);
         resultOutputDiv.innerHTML = '<p class="placeholder">Gagal mengakses kamera. Mohon berikan izin.</p>';
@@ -162,9 +163,15 @@ async function startScanner() {
     }
 }
 
+function stopScanner() {
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+    scanning = false;
+}
+
 function tick() {
-    if (!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) {
-        requestAnimationFrame(tick);
+    if (!scanning || !video.srcObject) {
         return;
     }
 
@@ -177,30 +184,18 @@ function tick() {
         inversionAttempts: "dontInvert",
     });
 
-    if (code && code.data !== lastScanResult) {
-        lastScanResult = code.data;
+    if (code) {
+        stopScanner();
         resultOutputDiv.innerHTML = '<p class="placeholder">Menganalisis...</p>';
         resultOutputDiv.className = 'result-card unknown';
         
         setTimeout(() => {
             const result = analyzeAndDetect(code.data);
             displayResult(result, resultOutputDiv);
-            lastScanResult = null;
         }, 500); 
-    } else if (!code) {
-        resultOutputDiv.innerHTML = '<p class="placeholder">Arahkan kamera ke QR code...</p>';
-        resultOutputDiv.className = 'result-card unknown';
-        lastScanResult = null;
+    } else {
+        requestAnimationFrame(tick);
     }
-
-    requestAnimationFrame(tick);
-}
-
-function stopScanner() {
-    if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-    }
-    scanning = false;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
