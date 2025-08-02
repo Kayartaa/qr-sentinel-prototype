@@ -104,26 +104,6 @@ function analyzeAndDetect(inputData) {
     }
 }
 
-function performScan() {
-    const inputElement = document.getElementById('dataInput');
-    const resultOutputDiv = document.getElementById('resultOutput');
-    const inputData = inputElement.value;
-
-    resultOutputDiv.innerHTML = '<p class="placeholder">Menganalisis...</p>';
-    resultOutputDiv.className = 'result-card';
-
-    if (!inputData) {
-        resultOutputDiv.innerHTML = '<p class="placeholder">Silakan masukkan data untuk dianalisis.</p>';
-        resultOutputDiv.classList.add('unknown');
-        return;
-    }
-
-    setTimeout(() => {
-        const result = analyzeAndDetect(inputData);
-        displayResult(result, resultOutputDiv);
-    }, 500);
-}
-
 function displayResult(result, outputDiv) {
     let statusClass = '';
     let statusDisplay = result.status;
@@ -151,6 +131,78 @@ function displayResult(result, outputDiv) {
     `;
 }
 
+const video = document.getElementById('camera-feed');
+const resultOutputDiv = document.getElementById('resultOutput');
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+let scanning = false;
+let lastScanResult = null;
+
+async function startScanner() {
+    if (scanning) return;
+
+    try {
+        resultOutputDiv.innerHTML = '<p class="placeholder">Memuat kamera...</p>';
+        resultOutputDiv.className = 'result-card unknown';
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+        video.setAttribute('playsinline', true); 
+        video.play();
+        scanning = true;
+
+        video.addEventListener('loadedmetadata', () => {
+            tick();
+        });
+
+    } catch (err) {
+        console.error("Error accessing camera: ", err);
+        resultOutputDiv.innerHTML = '<p class="placeholder">Gagal mengakses kamera. Mohon berikan izin.</p>';
+        resultOutputDiv.className = 'result-card malicious';
+    }
+}
+
+function tick() {
+    if (!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(tick);
+        return;
+    }
+
+    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+    });
+
+    if (code && code.data !== lastScanResult) {
+        lastScanResult = code.data;
+        resultOutputDiv.innerHTML = '<p class="placeholder">Menganalisis...</p>';
+        resultOutputDiv.className = 'result-card unknown';
+        
+        setTimeout(() => {
+            const result = analyzeAndDetect(code.data);
+            displayResult(result, resultOutputDiv);
+            lastScanResult = null;
+        }, 500); 
+    } else if (!code) {
+        resultOutputDiv.innerHTML = '<p class="placeholder">Arahkan kamera ke QR code...</p>';
+        resultOutputDiv.className = 'result-card unknown';
+        lastScanResult = null;
+    }
+
+    requestAnimationFrame(tick);
+}
+
+function stopScanner() {
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+    scanning = false;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('resultOutput').innerHTML = '<p class="placeholder">Masukkan data di atas untuk melihat hasil analisis.</p>';
+    startScanner();
 });

@@ -7,17 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body> 
     <div class="container">
         <header>
             <h1>Proyek Deteksi Phising QR dan URL</h1>
-            <p class="subtitle">Aalisis Tautan QRIS dan URL</p>
+            <p class="subtitle">Verifikasi Tautan dengan Kamera Anda</p>
+        </header>
     
-
         <section class="input-section">
             <h2>Simulasi Pemindaian QR/URL</h2>
             <div class="info-box">
-                <p><strong>Cara Penggunaan:</strong> Tempelkan string QRIS atau URL ke dalam kotak di bawah. Kami akan mensimulasikan proses deteksi berdasarkan database dummy kami.</p>
+                <p><strong>Cara Penggunaan:</strong> Arahkan kamera Anda ke QR code. Sistem akan mensimulasikan proses deteksi berdasarkan database dummy kami.</p>
                 <p><strong>Coba contoh-contoh ini:</strong></p>
                 <ul>
                     <li><strong>QRIS Valid:</strong> `00020101021126750023COM.BANKSUMSELBABEL.WWW01189360012001201481730215BSB0100000481730303UMI51440014ID.CO.QRIS.WWW0215ID10221613974200303UMI5204931153033605802ID5915DINAS PERIKANAN6014BELITUNG TIMUR61053351262070703A01630484BA` (Dinas Perikanan)</li>
@@ -26,14 +26,19 @@
                     <li><strong>URL Berbahaya:</strong> `http://bit.ly/shopeebigsale662`</li>
                 </ul>
             </div>
-            <textarea id="dataInput" placeholder="Tempelkan data QRIS atau URL di sini..."></textarea>
-            <button onclick="performScan()">Analisis Sekarang</button>
+
+            <div class="scanner-container">
+                <video id="camera-feed"></video>
+                <div class="result-display">
+                    <p>Arahkan kamera ke QR code...</p>
+                </div>
+            </div>
         </section>
 
         <section class="result-section">
             <h2>Hasil Deteksi</h2>
             <div id="resultOutput" class="result-card">
-                <p class="placeholder">Masukkan data di atas untuk melihat hasil analisis.</p>
+                <p class="placeholder">Arahkan kamera ke QR code untuk melihat hasil analisis.</p>
             </div>
         </section>
 
@@ -76,6 +81,7 @@
         </section>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
